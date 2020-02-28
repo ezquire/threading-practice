@@ -1,7 +1,7 @@
 import logging
 import os
+from concurrent.futures import ThreadPoolExecutor
 from functools import partial
-from multiprocessing.pool import Pool
 from time import time
 
 from download import *
@@ -17,9 +17,10 @@ def main():
         raise Exception("IMGUR_CLIENT_ID env variable does not exist")
     download_dir = setup_download_dir()
     links = get_links(client_id)
-    download = partial(download_link, download_dir)
-    with Pool(4) as p:
-        p.map(download, links)
+
+    with ThreadPoolExecutor() as executor:
+        fn = partial(download_link, download_dir)
+        executor.map(fn, links, timeout=30)
     logging.info('Took %s seconds', time() - ts)
 
 if __name__ == '__main__':

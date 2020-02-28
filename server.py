@@ -1,12 +1,14 @@
 import logging
 import os
-from functools import partial
-from multiprocessing.pool import Pool
 from time import time
+
+from redis import Redis
+
+from rq import Queue
 
 from download import *
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+logging.basicConfig(level=logging.INFO, fromat='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logging.getLogger('requests').setLevel(logging.CRITICAL)
 logger = logging.getLogger(__name__)
 
@@ -17,9 +19,9 @@ def main():
         raise Exception("IMGUR_CLIENT_ID env variable does not exist")
     download_dir = setup_download_dir()
     links = get_links(client_id)
-    download = partial(download_link, download_dir)
-    with Pool(4) as p:
-        p.map(download, links)
+    q = Queue(connection=Redis(host='localhost', port=6379))
+    for link in links:
+        q.enqueue(download_link, download_dir, link)
     logging.info('Took %s seconds', time() - ts)
 
 if __name__ == '__main__':
