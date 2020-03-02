@@ -6,8 +6,10 @@ from time import time
 
 from download import *
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-logging.getLogger('requests').setLevel(logging.CRITICAL)
+FORMAT = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+
+logging.basicConfig(level=logging.DEBUG, format=FORMAT)
+request_logger = logging.getLogger('requests').setLevel(logging.DEBUG)
 logger = logging.getLogger(__name__)
 
 def main():
